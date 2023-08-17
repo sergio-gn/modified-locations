@@ -75,6 +75,13 @@ function generate_page($page_template, $suburb, $parent)
 	global $location_template;
 	global $title_template;
 
+	$parent = isset($_POST['parent_page']) ? $_POST['parent_page'] : 0;
+
+	// Check if "none" is selected and adjust the parent value
+	if ($parent == 'none') {
+		$parent = 0;
+	}
+
 	$title = create_page_title($suburb);
 	$content = create_page_content($suburb);
 	$slug = create_page_slug($title);
@@ -90,7 +97,7 @@ function generate_page($page_template, $suburb, $parent)
 			'ping_status' => 'closed', // 'closed' means pingbacks or trackbacks turned off
 			'post_content' => $content, //The full text of the post.
 			'post_name' => $slug, // The slug for your post
-			'post_parent' => 0, //Sets the parent of the new post.
+			'post_parent' => $parent, //Sets the parent of the new post.
 			'post_status' => 'publish', //Set the status of the new post.
 			'post_title' => $title, //The title of your post.
 			'post_type' => 'page' //You may want to insert a regular post, page, link, a menu item or some custom post type
@@ -165,7 +172,6 @@ function create_menu()
 	add_submenu_page( 'create-location-pages', 'Set Locations Template', 'Set Template', 'manage_options', 'set-template', 'set_template_page');
 }
 
-// TODO Clean this mess up and get rid of all the echos!
 function location_gen_page()
 {
 	global $pages_added;
@@ -206,7 +212,18 @@ function location_gen_page()
 	echo '<table border="1" cellpadding="0" cellspacing="0"><tbody><tr>';
 	echo '<td><textarea style="width: 300px; height: 600px;" name="suburbs"></textarea></td>';
 	echo '<td width="100">&nbsp;</td>';
-	echo '<td valign="top"><strong>Parent Page</strong><br/>' . wp_dropdown_pages( array( 'depth' => 4, 'echo' => 0 )) . '<br /><br />';
+	echo '<td valign="top"><strong>Parent Page</strong><br/>';
+
+// Get the default dropdown HTML
+$dropdown = wp_dropdown_pages( array( 'depth' => 4, 'echo' => 0, 'name' => 'parent_page' ));
+
+// Add the "none" option
+$none_option = '<option value="0">None</option>';
+$dropdown_with_none = preg_replace('/<select(.*?)>/','<select$1>' . $none_option, $dropdown, 1);
+
+// Output the modified dropdown
+echo $dropdown_with_none . '<br /><br />';
+
 	echo '<strong>Page Template</strong><br/>';
 	echo '<select name="page_template">';
 	echo '<option value="default">Default Template</option>';
@@ -217,23 +234,32 @@ function location_gen_page()
 	echo '</form></div>';
 }
 
-// TODO Clean this mess up and get rid of all the echos!
-function set_template_page()
-{
-	if (!current_user_can('manage_options'))  {
-		wp_die( __('You do not have sufficient permissions to access this page.') );
-	}
-	echo '<div class="wrap">';
-	echo '<h2>Set Location Template</h2>';
-	if ($_GET['updated'])
-		echo '<div class="updated">Template updated successfully!</div>';
-	echo '<form method="post" action="options.php">';
-	settings_fields( 'location-generator-settings' );
-	do_settings_fields( 'location-generator-settings', 'Locations' );
-	echo '<strong>Title Template</strong><br /><input type="text"style="width: 800px;" name="title_template" value="'. get_option('title_template') . '" /><br /><br />';
-	echo '<strong>Slug Template</strong><br /><input type="text" style="width: 800px;" name="slug_template" value="'. get_option('slug_template') . '" /><br /><br />';
-	echo '<strong>Page Content Template</strong><br /><textarea style="width: 800px; height: 500px;" name="location_template">' . get_option('location_template') . '</textarea><br /><br />';
-	echo '<input type="submit" value="Save">';
-	echo '</form></div>';
+function set_template_page() {
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+
+    $updated_message = isset($_GET['updated']) ? '<div class="updated">Template updated successfully!</div>' : '';
+
+    $title_template = get_option('title_template', '');
+    $slug_template = get_option('slug_template', '');
+    $location_template = get_option('location_template', '');
+
+    ?>
+    <div class="wrap">
+        <h2>Set Location Template</h2>
+        <?php echo $updated_message; ?>
+        <form method="post" action="options.php">
+            <?php settings_fields('location-generator-settings'); ?>
+            <?php do_settings_fields('location-generator-settings', 'Locations'); ?>
+            <strong>Title Template</strong><br />
+            <input type="text" style="width: 800px;" name="title_template" value="<?php echo esc_attr($title_template); ?>" /><br /><br />
+            <strong>Slug Template</strong><br />
+            <input type="text" style="width: 800px;" name="slug_template" value="<?php echo esc_attr($slug_template); ?>" /><br /><br />
+            <strong>Page Content Template</strong><br />
+            <textarea style="width: 800px; height: 500px;" name="location_template"><?php echo esc_textarea($location_template); ?></textarea><br /><br />
+            <input type="submit" value="Save">
+        </form>
+    </div>
+    <?php
 }
-?>
