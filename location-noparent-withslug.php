@@ -230,9 +230,9 @@ function set_template_page()
 	echo '<form method="post" action="options.php">';
 	settings_fields( 'location-generator-settings' );
 	do_settings_fields( 'location-generator-settings', 'Locations' );
-	echo '<strong>Slug Template</strong><br /><input type="text" name="slug_template" value="'. get_option('slug_template') . '" /><br /><br />';
-	echo '<strong>Title Template</strong><br /><input type="text" name="title_template" value="'. get_option('title_template') . '" /><br /><br />';
-	echo '<strong>Page Content Template</strong><br /><textarea name="location_template">' . get_option('location_template') . '</textarea><br /><br />';
+	echo '<strong>Title Template</strong><br /><input type="text"style="width: 800px;" name="title_template" value="'. get_option('title_template') . '" /><br /><br />';
+	echo '<strong>Slug Template</strong><br /><input type="text" style="width: 800px;" name="slug_template" value="'. get_option('slug_template') . '" /><br /><br />';
+	echo '<strong>Page Content Template</strong><br /><textarea style="width: 800px; height: 500px;" name="location_template">' . get_option('location_template') . '</textarea><br /><br />';
 	echo '<input type="submit" value="Save">';
 	echo '</form></div>';
 }
