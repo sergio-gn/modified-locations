@@ -84,7 +84,7 @@ function generate_page($page_template, $suburb, $parent)
 
 	$title = create_page_title($suburb);
 	$content = create_page_content($suburb);
-	$slug = create_page_slug($title);
+	$slug = create_page_slug($suburb);
 
 	// Look for any pages with the same slug
 	$identical_posts = get_posts( array( 'name' => $slug, 'post_type' => 'page') );
